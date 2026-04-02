@@ -1,0 +1,254 @@
+// This is your Prisma schema file.
+// Learn more: https://pris.ly/d/prisma-schema
+//
+// READING THIS FILE:
+// - Each "model" = a table in PostgreSQL
+// - Each field = a column in that table
+// - The types (String, Int, DateTime) map to PostgreSQL types automatically
+// - @id = primary key, @unique = unique constraint, @default = default value
+// - Relations (e.g. workouts WorkoutSession[]) link tables together
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+// NextAuth.js requires specific fields here (id, email, name, image, emailVerified)
+// We add fitness-specific fields on top (heightCm, weightKg, goal, etc.)
+
+model User {
+  id            String    @id @default(cuid())  // cuid() = collision-resistant unique ID
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // hashed with bcrypt (null if using OAuth)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Fitness profile
+  heightCm      Float?
+  goal          Goal      @default(BUILD_MUSCLE)
+  fitnessLevel  Level     @default(BEGINNER)
+
+  // Relations - these are NOT columns, just navigation pointers
+  accounts         Account[]
+  sessions         Session[]
+  workoutSessions  WorkoutSession[]
+  bodyWeightLogs   BodyWeightLog[]
+  nutritionLogs    NutritionLog[]
+  aiConversations  AiConversation[]
+  programs         Program[]
+}
+
+// ─── NEXTAUTH TABLES ──────────────────────────────────────────────────────────
+// Required by NextAuth + Prisma adapter. Don't modify these.
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+// ─── EXERCISES ────────────────────────────────────────────────────────────────
+// A library of exercises (seeded in prisma/seed.ts)
+// Think of this like a reference table — workouts link to exercises
+
+model Exercise {
+  id           String       @id @default(cuid())
+  name         String       @unique  // e.g. "Bench Press", "Squat"
+  muscleGroup  MuscleGroup
+  equipment    Equipment    @default(BARBELL)
+  instructions String?      @db.Text
+  isCustom     Boolean      @default(false)  // user-created exercise
+
+  // Every set logged ever belongs to an exercise
+  sets         WorkoutSet[]
+}
+
+// ─── WORKOUT SESSIONS ─────────────────────────────────────────────────────────
+// A single gym session. Contains many WorkoutSets.
+// e.g. "Monday chest day" = one WorkoutSession with 4-5 exercises
+
+model WorkoutSession {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  duration  Int?     // minutes
+  notes     String?  @db.Text
+  
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sets WorkoutSet[]
+
+  @@index([userId, date])  // index speeds up queries filtered by user + date
+}
+
+// ─── WORKOUT SETS ─────────────────────────────────────────────────────────────
+// A single set within a workout session.
+// e.g. "Bench Press — 80kg x 8 reps" = one WorkoutSet
+
+model WorkoutSet {
+  id               String   @id @default(cuid())
+  workoutSessionId String
+  exerciseId       String
+  setNumber        Int      // 1, 2, 3...
+  reps             Int
+  weightKg         Float
+  rpe              Int?     // Rate of Perceived Exertion 1-10 (optional)
+  notes            String?
+  createdAt        DateTime @default(now())
+
+  workoutSession WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+  exercise       Exercise       @relation(fields: [exerciseId], references: [id])
+
+  @@index([exerciseId])
+}
+
+// ─── BODY WEIGHT LOGS ─────────────────────────────────────────────────────────
+model BodyWeightLog {
+  id        String   @id @default(cuid())
+  userId    String
+  weightKg  Float
+  date      DateTime @default(now())
+  notes     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+// ─── NUTRITION LOGS ───────────────────────────────────────────────────────────
+// User describes a meal in plain text, AI estimates macros
+
+model NutritionLog {
+  id          String   @id @default(cuid())
+  userId      String
+  description String   @db.Text  // "2 eggs, toast, coffee with milk"
+  calories    Int?     // AI-estimated
+  proteinG    Float?
+  carbsG      Float?
+  fatG        Float?
+  date        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+// ─── AI CONVERSATIONS ─────────────────────────────────────────────────────────
+// Stores chat history with the AI coach
+
+model AiConversation {
+  id        String        @id @default(cuid())
+  userId    String
+  title     String?       // e.g. "Upper body program request"
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+}
+
+model AiMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           Role     // "user" or "assistant"
+  content        String   @db.Text
+  createdAt      DateTime @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// ─── PROGRAMS ─────────────────────────────────────────────────────────────────
+// AI-generated multi-week training programs
+
+model Program {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?  @db.Text
+  weeksTotal  Int      @default(4)
+  isActive    Boolean  @default(false)
+  content     String   @db.Text  // JSON string of the full program
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+// Enums = a fixed set of allowed values for a field
+
+enum Goal {
+  BUILD_MUSCLE
+  LOSE_WEIGHT
+  IMPROVE_STRENGTH
+  IMPROVE_ENDURANCE
+  STAY_ACTIVE
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum MuscleGroup {
+  CHEST
+  BACK
+  SHOULDERS
+  ARMS
+  LEGS
+  GLUTES
+  CORE
+  FULL_BODY
+  CARDIO
+}
+
+enum Equipment {
+  BARBELL
+  DUMBBELL
+  MACHINE
+  CABLE
+  BODYWEIGHT
+  KETTLEBELL
+  RESISTANCE_BAND
+  OTHER
+}
+
+enum Role {
+  user
+  assistant
+}
