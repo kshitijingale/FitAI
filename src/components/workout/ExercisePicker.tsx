@@ -56,13 +56,18 @@ export function ExercisePicker({ onSelect, onClose }: ExercisePickerProps) {
     >
       {/* Modal panel — stop click propagation so clicking inside doesn't close it */}
       <div
-        className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-xl"
+        className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-xl"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Choose exercise</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Choose exercise</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none"
+        >
+          ×
+        </button>
         </div>
 
         {/* Search input */}
@@ -73,19 +78,19 @@ export function ExercisePicker({ onSelect, onClose }: ExercisePickerProps) {
             placeholder="Search exercises..."
             value={search}
             onChange={e => { setSearch(e.target.value); setSelectedMuscle(null) }}
-            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-100"
           />
         </div>
 
         {/* Muscle group filter pills — hidden when searching */}
         {!search && (
-          <div className="px-4 py-2 border-b border-gray-100 flex gap-2 overflow-x-auto scrollbar-hide">
+          <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex gap-2 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setSelectedMuscle(null)}
               className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 !selectedMuscle
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               All
@@ -97,7 +102,7 @@ export function ExercisePicker({ onSelect, onClose }: ExercisePickerProps) {
                 className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                   selectedMuscle === muscle
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {MUSCLE_LABELS[muscle]}
@@ -133,7 +138,7 @@ export function ExercisePicker({ onSelect, onClose }: ExercisePickerProps) {
                 if (list.length === 0) return null
                 return (
                   <div key={muscle}>
-                    <div className="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 text-xs font-semibold text-gray-400 dark:text-gray-400 uppercase tracking-wide">
                       {MUSCLE_LABELS[muscle]}
                     </div>
                     <ul>
@@ -158,10 +163,10 @@ function ExerciseRow({ exercise, onSelect }: { exercise: Exercise; onSelect: (e:
     <li>
       <button
         onClick={() => onSelect(exercise)}
-        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between group transition-colors"
+        className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-between group transition-colors"
       >
-        <span className="text-sm font-medium text-gray-800">{exercise.name}</span>
-        <span className="text-xs text-gray-400 group-hover:text-blue-500 transition-colors">
+        <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{exercise.name}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-400 group-hover:text-blue-500 transition-colors">
           {exercise.equipment.replace('_', ' ')}
         </span>
       </button>

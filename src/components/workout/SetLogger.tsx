@@ -56,19 +56,19 @@ export function SetLogger({ exercise, sets, onChange, onRemoveExercise }: SetLog
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
       {/* Exercise header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
         <div>
-          <p className="font-semibold text-gray-900 text-sm">{exercise.name}</p>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{exercise.name}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-400 mt-0.5">
             {exercise.muscleGroup.charAt(0) + exercise.muscleGroup.slice(1).toLowerCase()}
             {' · '}{exercise.equipment.replace('_', ' ')}
           </p>
         </div>
         <button
           onClick={onRemoveExercise}
-          className="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none px-1"
+          className="text-gray-300 dark:text-gray-300 hover:text-red-400 transition-colors text-lg leading-none px-1"
           title="Remove exercise"
         >
           ×
@@ -77,10 +77,10 @@ export function SetLogger({ exercise, sets, onChange, onRemoveExercise }: SetLog
 
       {/* Column headers */}
       <div className="grid grid-cols-[36px_1fr_1fr_80px_32px] gap-2 px-4 pt-3 pb-1">
-        <span className="text-xs font-medium text-gray-400">SET</span>
-        <span className="text-xs font-medium text-gray-400">KG</span>
-        <span className="text-xs font-medium text-gray-400">REPS</span>
-        <span className="text-xs font-medium text-gray-400">RPE</span>
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-400">SET</span>
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-400">KG</span>
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-400">REPS</span>
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-400">RPE</span>
         <span />
       </div>
 
@@ -89,7 +89,7 @@ export function SetLogger({ exercise, sets, onChange, onRemoveExercise }: SetLog
         {sets.map((set, index) => (
           <div key={set.id} className="grid grid-cols-[36px_1fr_1fr_80px_32px] gap-2 items-center">
             {/* Set number badge */}
-            <span className="text-xs font-semibold text-gray-400 text-center">
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-400 text-center">
               {index + 1}
             </span>
 
@@ -102,7 +102,7 @@ export function SetLogger({ exercise, sets, onChange, onRemoveExercise }: SetLog
               value={set.weightKg}
               onChange={e => updateSet(set.id, 'weightKg', e.target.value)}
               placeholder="0"
-              className="w-full px-2 py-2 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-2 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-gray-100"
             />
 
             {/* Reps input */}
@@ -114,7 +114,7 @@ export function SetLogger({ exercise, sets, onChange, onRemoveExercise }: SetLog
               value={set.reps}
               onChange={e => updateSet(set.id, 'reps', e.target.value)}
               placeholder="8"
-              className="w-full px-2 py-2 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-2 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-gray-100"
             />
 
             {/* RPE input (optional) */}
@@ -126,14 +126,14 @@ export function SetLogger({ exercise, sets, onChange, onRemoveExercise }: SetLog
               value={set.rpe}
               onChange={e => updateSet(set.id, 'rpe', e.target.value)}
               placeholder="—"
-              className="w-full px-2 py-2 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-400"
+              className="w-full px-2 py-2 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-400 dark:text-gray-300"
             />
 
             {/* Remove set button */}
             <button
               onClick={() => removeSet(set.id)}
               disabled={sets.length === 1}  // can't remove the last set
-              className="text-gray-200 hover:text-red-400 disabled:opacity-0 disabled:cursor-not-allowed transition-colors text-lg leading-none"
+              className="text-gray-200 dark:text-gray-100 hover:text-red-400 disabled:opacity-0 disabled:cursor-not-allowed transition-colors text-lg leading-none"
             >
               ×
             </button>
@@ -142,16 +142,16 @@ export function SetLogger({ exercise, sets, onChange, onRemoveExercise }: SetLog
       </div>
 
       {/* Add set + volume total row */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 dark:border-gray-700">
         <button
           onClick={addSet}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium flex items-center gap-1"
         >
           + Add set
         </button>
 
         {/* Live volume calculation — shows total volume for this exercise */}
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-gray-400 dark:text-gray-400">
           {(() => {
             const volume = sets.reduce((total, s) => {
               const w = parseFloat(s.weightKg) || 0

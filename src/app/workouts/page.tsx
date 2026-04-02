@@ -59,15 +59,15 @@ export default async function WorkoutsPage() {
   }, {})
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-4">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-4">
         <div className="max-w-xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <a href="/dashboard" className="text-gray-400 hover:text-gray-600 text-sm">←</a>
+            <a href="/dashboard" className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm">←</a>
             <div>
-              <h1 className="font-semibold text-gray-900">Workouts</h1>
-              <p className="text-xs text-gray-400">{workouts.length} sessions logged</p>
+              <h1 className="font-semibold text-gray-900 dark:text-gray-100">Workouts</h1>
+              <p className="text-xs text-gray-400 dark:text-gray-400">{workouts.length} sessions logged</p>
             </div>
           </div>
           <a
@@ -83,10 +83,10 @@ export default async function WorkoutsPage() {
 
         {/* Empty state */}
         {workouts.length === 0 && (
-          <div className="text-center py-20">
+              <div className="text-center py-20">
             <div className="text-5xl mb-4">📋</div>
-            <p className="font-semibold text-gray-700 mb-1">No workouts yet</p>
-            <p className="text-sm text-gray-400 mb-6">Log your first session to see it here.</p>
+                <p className="font-semibold text-gray-700 dark:text-gray-200 mb-1">No workouts yet</p>
+                <p className="text-sm text-gray-400 dark:text-gray-400 mb-6">Log your first session to see it here.</p>
             <a
               href="/workouts/new"
               className="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
@@ -114,12 +114,12 @@ export default async function WorkoutsPage() {
                     <a
                       key={workout.id}
                       href={`/workouts/${workout.id}`}
-                      className="block bg-white rounded-2xl border border-gray-200 p-4 hover:border-gray-300 hover:shadow-sm transition-all"
+                      className="block bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-sm transition-all"
                     >
                       {/* Date + duration row */}
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <p className="font-semibold text-gray-900 text-sm">
+                          <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                             {new Date(workout.date).toLocaleDateString('en-IN', {
                               weekday: 'long',
                               day:     'numeric',
@@ -133,7 +133,7 @@ export default async function WorkoutsPage() {
 
                         {/* Volume badge */}
                         {volume > 0 && (
-                          <span className="text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full font-medium">
+                          <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-full font-medium">
                             {Math.round(volume).toLocaleString()} kg
                           </span>
                         )}
@@ -144,7 +144,7 @@ export default async function WorkoutsPage() {
                         {exercises.slice(0, 5).map(name => (
                           <span
                             key={name}
-                            className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
+                            className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200 px-2.5 py-1 rounded-full"
                           >
                             {name}
                           </span>
@@ -157,7 +157,7 @@ export default async function WorkoutsPage() {
                       </div>
 
                       {/* Stats row */}
-                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                      <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-400">
                         <span>{workout.sets.length} sets</span>
                         <span>{exercises.length} exercises</span>
                         {workout.notes && <span>📝 Note</span>}

@@ -49,18 +49,18 @@ export default async function WorkoutDetailPage({ params }: WorkoutDetailPagePro
   const totalVolume = workout.sets.reduce((total, s) => total + s.weightKg * s.reps, 0)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-4">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-4">
         <div className="max-w-xl mx-auto flex items-center gap-3">
-          <a href="/workouts" className="text-gray-400 hover:text-gray-600 text-sm">← Workouts</a>
+          <a href="/workouts" className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm">← Workouts</a>
           <div>
-            <h1 className="font-semibold text-gray-900">
+            <h1 className="font-semibold text-gray-900 dark:text-gray-100">
               {new Date(workout.date).toLocaleDateString('en-IN', {
                 weekday: 'long', day: 'numeric', month: 'long'
               })}
             </h1>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 dark:text-gray-400">
               {workout.sets.length} sets · {Object.keys(byExercise).length} exercises
               {totalVolume > 0 && ` · ${Math.round(totalVolume).toLocaleString()} kg total`}
             </p>
@@ -76,12 +76,12 @@ export default async function WorkoutDetailPage({ params }: WorkoutDetailPagePro
           const bestSet = sets.reduce((best, s) => s.weightKg > best.weightKg ? s : best)
 
           return (
-            <div key={exercise.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div key={exercise.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
               {/* Exercise header */}
-              <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">{exercise.name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{exercise.name}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-400 mt-0.5">
                     Best: {bestSet.weightKg}kg × {bestSet.reps} reps
                     {exerciseVolume > 0 && ` · ${Math.round(exerciseVolume).toLocaleString()} kg volume`}
                   </p>
@@ -92,16 +92,16 @@ export default async function WorkoutDetailPage({ params }: WorkoutDetailPagePro
               <div className="px-4 py-3">
                 <div className="grid grid-cols-[36px_1fr_1fr_80px] gap-2 mb-2">
                   {['SET', 'KG', 'REPS', 'RPE'].map(h => (
-                    <span key={h} className="text-xs font-medium text-gray-400">{h}</span>
+                    <span key={h} className="text-xs font-medium text-gray-400 dark:text-gray-400">{h}</span>
                   ))}
                 </div>
                 <div className="space-y-2">
                   {sets.map((set, i) => (
                     <div key={set.id} className="grid grid-cols-[36px_1fr_1fr_80px] gap-2 text-sm">
-                      <span className="text-gray-400 text-xs font-semibold">{i + 1}</span>
-                      <span className="text-gray-800 font-medium">{set.weightKg}kg</span>
-                      <span className="text-gray-800 font-medium">{set.reps}</span>
-                      <span className="text-gray-400">{set.rpe ?? '—'}</span>
+                      <span className="text-gray-400 dark:text-gray-400 text-xs font-semibold">{i + 1}</span>
+                      <span className="text-gray-800 dark:text-gray-100 font-medium">{set.weightKg}kg</span>
+                      <span className="text-gray-800 dark:text-gray-100 font-medium">{set.reps}</span>
+                      <span className="text-gray-400 dark:text-gray-400">{set.rpe ?? '—'}</span>
                     </div>
                   ))}
                 </div>
@@ -112,9 +112,9 @@ export default async function WorkoutDetailPage({ params }: WorkoutDetailPagePro
 
         {/* Notes */}
         {workout.notes && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Notes</p>
-            <p className="text-sm text-gray-700 leading-relaxed">{workout.notes}</p>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-400 uppercase tracking-wide mb-2">Notes</p>
+            <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">{workout.notes}</p>
           </div>
         )}
 

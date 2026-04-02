@@ -146,21 +146,21 @@ export default function NewWorkoutPage() {
   // ── RENDER ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Sticky header with live stats */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
+      <header className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <div className="max-w-xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
-              className="text-gray-400 hover:text-gray-600 text-sm"
+              className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
             >
               ← Cancel
             </button>
             <div>
-              <p className="font-semibold text-gray-900 text-sm">New workout</p>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">New workout</p>
               {/* Live stats: exercises · sets · volume */}
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 dark:text-gray-400">
                 {blocks.length > 0
                   ? `${blocks.length} exercise${blocks.length > 1 ? 's' : ''} · ${totalSets} sets${totalVolume > 0 ? ` · ${Math.round(totalVolume).toLocaleString()} kg` : ''}`
                   : 'Add exercises below'
@@ -185,7 +185,7 @@ export default function NewWorkoutPage() {
 
         {/* Error banner */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+          <div className="bg-red-50 dark:bg-red-950/30 dark:border-red-900 border border-red-200 text-red-700 dark:text-red-200 text-sm rounded-xl px-4 py-3">
             {error}
           </div>
         )}
@@ -223,14 +223,14 @@ export default function NewWorkoutPage() {
         {/* Add exercise button */}
         <button
           onClick={() => setShowPicker(true)}
-          className="w-full py-3.5 border-2 border-dashed border-gray-200 rounded-2xl text-sm font-medium text-gray-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50 transition-all"
+          className="w-full py-3.5 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl text-sm font-medium text-gray-400 dark:text-gray-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50 transition-all"
         >
           + Add exercise
         </button>
 
         {/* Notes textarea */}
         {blocks.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">
               Session notes
             </label>
@@ -240,7 +240,7 @@ export default function NewWorkoutPage() {
               placeholder="How did the session feel? Any PRs? Injuries to note?"
               rows={3}
               maxLength={500}
-              className="w-full text-sm text-gray-700 placeholder-gray-300 resize-none focus:outline-none"
+              className="w-full text-sm text-gray-700 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500 resize-none focus:outline-none bg-transparent"
             />
             <p className="text-right text-xs text-gray-300 mt-1">
               {notes.length}/500
@@ -250,7 +250,7 @@ export default function NewWorkoutPage() {
 
         {/* Quick tips — shown to new users */}
         {blocks.length === 0 && (
-          <div className="bg-blue-50 rounded-2xl border border-blue-100 p-4 space-y-2">
+          <div className="bg-blue-50 dark:bg-blue-950/20 rounded-2xl border border-blue-100 dark:border-blue-900/40 p-4 space-y-2">
             <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Tips</p>
             <ul className="text-sm text-blue-700 space-y-1">
               <li>• RPE is optional — rate effort from 1 (easy) to 10 (max)</li>
