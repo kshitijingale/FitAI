@@ -7,9 +7,9 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const router  = useRouter()
-  const [mode,  setMode]  = useState<'login' | 'register'>('login')
-  const [name,  setName]  = useState('')
+  const router = useRouter()
+  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -23,9 +23,9 @@ export default function LoginPage() {
     if (mode === 'register') {
       // Call our register API first
       const res = await fetch('/api/auth/register', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password }),
       })
       const data = await res.json()
 
@@ -53,11 +53,21 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-      <div className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-8">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+
+      {/* Background Image */}
+      <img
+        src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?auto=format&fit=crop&w=1920&q=80"
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover opacity-15"
+      />
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-sm bg-white/90 dark:bg-gray-900/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 p-8 mx-4 sm:mx-0">
+
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">FitAI</h1>
+          <h1 className="text-2xl font-bold dark:text-gray-400 text-gray-900">FitAI</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your AI-powered fitness coach</p>
         </div>
 
@@ -67,11 +77,10 @@ export default function LoginPage() {
             <button
               key={m}
               onClick={() => { setMode(m); setError('') }}
-              className={`flex-1 py-1.5 text-sm rounded-md transition-all ${
-                mode === m
-                  ? 'bg-white shadow-sm font-medium dark:bg-gray-800'
-                  : 'text-gray-500 dark:text-gray-400'
-              }`}
+              className={`flex-1 py-1.5 text-sm rounded-md transition-all ${mode === m
+                ? 'bg-white shadow-sm font-medium dark:bg-gray-800'
+                : 'text-gray-500 dark:text-gray-400'
+                }`}
             >
               {m === 'login' ? 'Sign in' : 'Create account'}
             </button>
