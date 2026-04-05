@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
@@ -8,8 +8,12 @@ const config: Config = {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        xs: '390px', //  custom breakpoint
+      },
+    },
   },
   plugins: [],
-}
-export default config
+};
+export default config;
