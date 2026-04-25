@@ -5,7 +5,7 @@ import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { SignOutButton } from '@/components/layout/SignOutButton'
+import { ResponsiveNav } from '@/components/layout/ResponsiveNav'
 
 export default async function DashboardPage() {
   // Server-side auth check — runs on the server before rendering
@@ -30,13 +30,13 @@ export default async function DashboardPage() {
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">FitAI</h1>
-          <nav className="flex items-center gap-6">
-            <a href="/dashboard" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Dashboard</a>
-            <a href="/workouts" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Workouts</a>
-            <a href="/ai-coach" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">AI Coach</a>
-            <SignOutButton />
-          </nav>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">F</span>
+            </div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">FitAI</h1>
+          </div>
+          <ResponsiveNav />
         </div>
       </header>
 

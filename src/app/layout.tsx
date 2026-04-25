@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 if (theme === 'dark') isDark = true;
                 else if (theme === 'light') isDark = false;
                 else if (theme === 'system') isDark = systemDark;
-                if (isDark) document.documentElement.classList.add('dark');
+                document.documentElement.classList.toggle('dark', isDark);
               } catch (e) {}
             `,
           }}

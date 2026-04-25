@@ -10,8 +10,8 @@ const config: Config = {
     // This maps @/* imports to src/* — same as tsconfig paths
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  testPathPattern: ['src/__tests__'],
-  setupFilesAfterFramework: [],
+  testMatch: ['<rootDir>/src/__tests__/**/*.test.ts'],
+  setupFilesAfterEnv: [],
 }
 
 export default config
