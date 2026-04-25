@@ -5,11 +5,12 @@ import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { SignOutButton } from '@/components/layout/SignOutButton'
 
 export default async function DashboardPage() {
   // Server-side auth check — runs on the server before rendering
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/')
 
   // Fetch stats directly in the server component — no API call needed
   const [totalWorkouts, recentWorkouts] = await Promise.all([
@@ -17,10 +18,10 @@ export default async function DashboardPage() {
       where: { userId: session.user.id },
     }),
     prisma.workoutSession.findMany({
-      where:   { userId: session.user.id },
+      where: { userId: session.user.id },
       include: { sets: { include: { exercise: true } } },
       orderBy: { date: 'desc' },
-      take:    5,
+      take: 5,
     }),
   ])
 
@@ -31,10 +32,10 @@ export default async function DashboardPage() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">FitAI</h1>
           <nav className="flex items-center gap-6">
-            <a href="/dashboard"   className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Dashboard</a>
-            <a href="/workouts"    className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Workouts</a>
-            <a href="/ai-coach"    className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">AI Coach</a>
-            <a href="/api/auth/signout" className="text-sm text-red-500 hover:text-red-700">Sign out</a>
+            <a href="/dashboard" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Dashboard</a>
+            <a href="/workouts" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Workouts</a>
+            <a href="/ai-coach" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">AI Coach</a>
+            <SignOutButton />
           </nav>
         </div>
       </header>

@@ -9,7 +9,7 @@ import { authOptions } from '@/lib/auth'
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions)
-  if (session) redirect('/dashboard')
+  if (session) redirect('/dashboard');
 
   return (
     <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">

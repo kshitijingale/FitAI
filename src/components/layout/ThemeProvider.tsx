@@ -18,14 +18,16 @@ function applyDarkClass(shouldBeDark: boolean) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [themeSetting, setThemeSetting] = useState<ThemeSetting>('system')
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
-      setThemeSetting(stored)
+  const [themeSetting, setThemeSetting] = useState<ThemeSetting>(() => {
+    // Read from localStorage synchronously (theme is already applied by script)
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored === 'light' || stored === 'dark' || stored === 'system') {
+        return stored
+      }
     }
-  }, [])
+    return 'system'
+  })
 
   const effectiveTheme: EffectiveTheme = useMemo(() => {
     if (themeSetting === 'dark') return 'dark'
@@ -33,6 +35,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return getSystemPrefersDark() ? 'dark' : 'light'
   }, [themeSetting])
 
+  // Only apply theme when it changes dynamically (not on initial mount)
   useEffect(() => {
     const shouldBeDark = effectiveTheme === 'dark'
     applyDarkClass(shouldBeDark)

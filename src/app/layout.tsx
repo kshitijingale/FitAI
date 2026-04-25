@@ -18,6 +18,23 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('fitai-theme-setting');
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                let isDark = systemDark;
+                if (theme === 'dark') isDark = true;
+                else if (theme === 'light') isDark = false;
+                else if (theme === 'system') isDark = systemDark;
+                if (isDark) document.documentElement.classList.add('dark');
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider>
           <SessionProvider>{children}</SessionProvider>
