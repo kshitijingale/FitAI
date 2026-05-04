@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAiChat } from '@/hooks/useAiChat'
 
 export default function AiCoachPage() {
-  const { messages, isStreaming, error, sendMessage } = useAiChat()
+  const { messages, isStreaming, error, sendMessage, retryLast } = useAiChat()
   const [input,     setInput]     = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -101,7 +101,20 @@ export default function AiCoachPage() {
           ))}
 
           {error && (
-            <p className="text-center text-red-500 text-sm">{error}</p>
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-center text-red-500 text-sm">{error}</p>
+              <button
+                type="button"
+                onClick={retryLast}
+                disabled={isStreaming}
+                className="text-sm px-4 py-2 rounded-xl border border-red-200 dark:border-red-900/50
+                           text-red-700 dark:text-red-200 bg-red-50 dark:bg-red-950/30
+                           hover:bg-red-100 dark:hover:bg-red-950/50
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Try again
+              </button>
+            </div>
           )}
 
           <div ref={bottomRef} />

@@ -18,7 +18,8 @@ function applyDarkClass(shouldBeDark: boolean) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [themeSetting, setThemeSetting] = useState<ThemeSetting>('system')
+  // Default to dark for everyone unless they choose otherwise.
+  const [themeSetting, setThemeSetting] = useState<ThemeSetting>('dark')
 
   useLayoutEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY)

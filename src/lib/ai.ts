@@ -29,6 +29,42 @@ export interface AiProvider {
   streamChat: (messages: AiMessage[], systemPrompt: string) => Promise<StreamResult>
 }
 
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) throw new Error(`Missing required environment variable: ${name}`)
+  return value
+}
+
+async function* streamSseJson(res: Response): AsyncGenerator<any, void, unknown> {
+  const reader = res.body?.getReader()
+  if (!reader) throw new Error('No response body to stream')
+
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed === 'data: [DONE]') continue
+      if (!trimmed.startsWith('data: ')) continue
+
+      const payload = trimmed.slice(6)
+      try {
+        yield JSON.parse(payload)
+      } catch {
+        // skip malformed lines
+      }
+    }
+  }
+}
+
 // ─── PROVIDER: GROQ ───────────────────────────────────────────────────────────
 // Free tier: 14,400 requests/day, ultra-fast inference
 // Models: llama-3.3-70b-versatile (best), llama-3.1-8b-instant (fastest)
@@ -37,10 +73,11 @@ export interface AiProvider {
 async function* groqStream(messages: AiMessage[], systemPrompt: string): StreamResult {
   // Groq uses the OpenAI-compatible API format
   // We use fetch() directly so we don't need the groq-sdk package
+  const apiKey = requireEnv('GROQ_API_KEY')
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method:  'POST',
     headers: {
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type':  'application/json',
     },
     body: JSON.stringify({
@@ -59,37 +96,9 @@ async function* groqStream(messages: AiMessage[], systemPrompt: string): StreamR
     throw new Error(`Groq API error: ${res.status} ${error}`)
   }
 
-  // STREAMING PARSE:
-  // Groq sends Server-Sent Events (SSE) — lines like:
-  //   data: {"choices":[{"delta":{"content":"Hello"}}]}
-  //   data: [DONE]
-  //
-  // We read the raw stream, split by newlines, and extract the text delta
-  const reader  = res.body!.getReader()
-  const decoder = new TextDecoder()
-  let   buffer  = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n')
-    buffer = lines.pop() ?? ''   // keep the incomplete last line in the buffer
-
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed || trimmed === 'data: [DONE]') continue
-      if (!trimmed.startsWith('data: ')) continue
-
-      try {
-        const json  = JSON.parse(trimmed.slice(6))   // strip "data: " prefix
-        const chunk = json.choices?.[0]?.delta?.content
-        if (chunk) yield chunk   // yield each text chunk to the caller
-      } catch {
-        // skip malformed lines
-      }
-    }
+  for await (const json of streamSseJson(res)) {
+    const chunk = json.choices?.[0]?.delta?.content
+    if (chunk) yield chunk
   }
 }
 
@@ -104,7 +113,7 @@ const groqProvider: AiProvider = {
 // Get key: aistudio.google.com
 
 async function* geminiStream(messages: AiMessage[], systemPrompt: string): StreamResult {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = requireEnv('GEMINI_API_KEY')
   const url    = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${apiKey}&alt=sse`
 
   // Gemini uses a different message format — "parts" instead of "content"
@@ -129,30 +138,9 @@ async function* geminiStream(messages: AiMessage[], systemPrompt: string): Strea
     throw new Error(`Gemini API error: ${res.status} ${error}`)
   }
 
-  const reader  = res.body!.getReader()
-  const decoder = new TextDecoder()
-  let   buffer  = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n')
-    buffer = lines.pop() ?? ''
-
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed || !trimmed.startsWith('data: ')) continue
-
-      try {
-        const json  = JSON.parse(trimmed.slice(6))
-        const chunk = json.candidates?.[0]?.content?.parts?.[0]?.text
-        if (chunk) yield chunk
-      } catch {
-        // skip malformed lines
-      }
-    }
+  for await (const json of streamSseJson(res)) {
+    const chunk = json.candidates?.[0]?.content?.parts?.[0]?.text
+    if (chunk) yield chunk
   }
 }
 
@@ -166,10 +154,11 @@ const geminiProvider: AiProvider = {
 // Get key: console.anthropic.com
 
 async function* anthropicStream(messages: AiMessage[], systemPrompt: string): StreamResult {
+  const apiKey = requireEnv('ANTHROPIC_API_KEY')
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method:  'POST',
     headers: {
-      'x-api-key':         process.env.ANTHROPIC_API_KEY!,
+      'x-api-key':         apiKey,
       'anthropic-version': '2023-06-01',
       'content-type':      'application/json',
     },
@@ -189,30 +178,9 @@ async function* anthropicStream(messages: AiMessage[], systemPrompt: string): St
     throw new Error(`Anthropic API error: ${res.status} ${error}`)
   }
 
-  const reader  = res.body!.getReader()
-  const decoder = new TextDecoder()
-  let   buffer  = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n')
-    buffer = lines.pop() ?? ''
-
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed || !trimmed.startsWith('data: ')) continue
-
-      try {
-        const json = JSON.parse(trimmed.slice(6))
-        if (json.type === 'content_block_delta' && json.delta?.type === 'text_delta') {
-          yield json.delta.text
-        }
-      } catch {
-        // skip malformed lines
-      }
+  for await (const json of streamSseJson(res)) {
+    if (json.type === 'content_block_delta' && json.delta?.type === 'text_delta') {
+      yield json.delta.text
     }
   }
 }

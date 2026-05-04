@@ -12,6 +12,20 @@ import { authOptions }      from '@/lib/auth'
 import { prisma }           from '@/lib/prisma'
 import { aiProvider }       from '@/lib/ai'     // ← the only AI import needed
 import type { ChatMessage, UserFitnessContext } from '@/types'
+import { z } from 'zod'
+
+const ChatPayloadSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string().min(1).max(8000),
+      })
+    )
+    .min(1)
+    .max(50),
+  conversationId: z.string().min(1).max(128).optional(),
+})
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
@@ -19,9 +33,30 @@ export async function POST(request: Request) {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const { messages, conversationId } = await request.json() as {
-    messages:        ChatMessage[]
+  let json: unknown
+  try {
+    json = await request.json()
+  } catch {
+    return new Response('Invalid JSON body', { status: 400 })
+  }
+
+  const parsed = ChatPayloadSchema.safeParse(json)
+  if (!parsed.success) {
+    return new Response('Invalid request payload', { status: 400 })
+  }
+
+  const { messages, conversationId } = parsed.data as {
+    messages: ChatMessage[]
     conversationId?: string
+  }
+
+  // If a conversationId is provided, ensure the user owns it before streaming.
+  if (conversationId) {
+    const owned = await prisma.aiConversation.findFirst({
+      where: { id: conversationId, userId: session.user.id },
+      select: { id: true },
+    })
+    if (!owned) return new Response('Conversation not found', { status: 404 })
   }
 
   // STEP 1: Fetch user's fitness data so the AI has personalised context
@@ -110,28 +145,23 @@ GUIDELINES:
 // ─── FETCH USER FITNESS CONTEXT ───────────────────────────────────────────────
 
 async function getUserFitnessContext(userId: string): Promise<UserFitnessContext> {
-  const [user, recentWorkouts] = await Promise.all([
-    prisma.user.findUnique({ where: { id: userId } }),
-    prisma.workoutSession.findMany({
-      where:   { userId },
-      include: { sets: { include: { exercise: true } } },
-      orderBy: { date: 'desc' },
-      take:    5,
-    }),
-  ])
-
-  // Get personal records (heaviest weight for each exercise)
-  const prs = await prisma.workoutSet.groupBy({
-    by:     ['exerciseId'],
-    where:  { workoutSession: { userId } },
-    _max:   { weightKg: true, reps: true },
-    orderBy: { exerciseId: 'asc' },
-    take:   10,
+  // Sequential queries to avoid prepared statement issues in serverless
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  const recentWorkouts = await prisma.workoutSession.findMany({
+    where:   { userId },
+    include: { sets: { include: { exercise: true } } },
+    orderBy: { date: 'desc' },
+    take:    5,
   })
 
-  const exerciseIds = prs.map(p => p.exerciseId)
-  const exercises   = await prisma.exercise.findMany({
-    where: { id: { in: exerciseIds } },
+  // Personal records: pick the single best set per exercise by max weight,
+  // then tie-break by reps, ensuring weightKg and reps come from the same row.
+  const prSets = await prisma.workoutSet.findMany({
+    where: { workoutSession: { userId } },
+    orderBy: [{ weightKg: 'desc' }, { reps: 'desc' }],
+    distinct: ['exerciseId'],
+    take: 10,
+    include: { exercise: true },
   })
 
   return {
@@ -142,14 +172,11 @@ async function getUserFitnessContext(userId: string): Promise<UserFitnessContext
       exercises:  [...new Set(w.sets.map(s => s.exercise.name))],
       totalSets:  w.sets.length,
     })),
-    personalRecords: prs.map(pr => {
-      const exercise = exercises.find(e => e.id === pr.exerciseId)
-      return {
-        exercise: exercise?.name ?? 'Unknown',
-        weightKg: pr._max.weightKg ?? 0,
-        reps:     pr._max.reps ?? 0,
-      }
-    }),
+    personalRecords: prSets.map(set => ({
+      exercise: set.exercise.name,
+      weightKg: set.weightKg,
+      reps: set.reps,
+    })),
   }
 }
 

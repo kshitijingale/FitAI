@@ -12,6 +12,8 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 
 export const authOptions: NextAuthOptions = {
+  // Ensures stable signing/encryption across reloads.
+  secret: process.env.NEXTAUTH_SECRET,
   // Adapter = tells NextAuth to store sessions/users in YOUR database (not in memory)
   adapter: PrismaAdapter(prisma) as any,
 

@@ -25,9 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               try {
                 const theme = localStorage.getItem('fitai-theme-setting');
                 const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                let isDark = systemDark;
-                if (theme === 'dark') isDark = true;
-                else if (theme === 'light') isDark = false;
+                // Default to dark for everyone unless explicitly set otherwise.
+                let isDark = true;
+                if (theme === 'light') isDark = false;
                 else if (theme === 'system') isDark = systemDark;
                 document.documentElement.classList.toggle('dark', isDark);
               } catch (e) {}
