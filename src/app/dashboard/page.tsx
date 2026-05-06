@@ -80,7 +80,11 @@ export default async function DashboardPage() {
               {recentWorkouts.map(workout => {
                 const exercises = [...new Set(workout.sets.map(s => s.exercise.name))]
                 return (
-                  <div key={workout.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <a
+                    key={workout.id}
+                    href={`/workouts/${workout.id}`}
+                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                  >
                     <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/40 rounded-lg flex items-center justify-center text-lg">💪</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
@@ -91,7 +95,7 @@ export default async function DashboardPage() {
                         {' · '}{workout.sets.length} sets
                       </p>
                     </div>
-                  </div>
+                  </a>
                 )
               })}
             </div>

@@ -53,7 +53,7 @@ export default async function WorkoutDetailPage({ params }: WorkoutDetailPagePro
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-4">
         <div className="max-w-xl mx-auto flex items-center gap-3">
-          <a href="/workouts" className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm">← Workouts</a>
+          <a href="/workouts" className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm">←</a>
           <div>
             <h1 className="font-semibold text-gray-900 dark:text-gray-100">
               {new Date(workout.date).toLocaleDateString('en-IN', {

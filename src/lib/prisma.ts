@@ -7,8 +7,38 @@
 //
 // This file creates ONE Prisma client and reuses it across reloads.
 // The `global` trick persists it between hot-reloads in dev.
+//
+// Prisma can print SQL via either:
+// 1) PrismaClient `log: ['query']`, or
+// 2) the `debug` package namespaces (commonly `DEBUG=prisma:query` / `prisma:*`)
+//
+// Your terminal output shows `prisma:query ...`, which is the debug-logger path.
+// We remove any `prisma:*` entries from `process.env.DEBUG` before loading `@prisma/client`.
+import type { PrismaClient } from '@prisma/client'
 
-import { PrismaClient } from '@prisma/client'
+const disablePrismaDebugNamespaces = () => {
+  const dbg = process.env.DEBUG
+  if (!dbg) return
+
+  const parts = dbg
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean)
+
+  const kept = parts.filter((p) => !p.startsWith('prisma:'))
+
+  if (kept.length === 0) {
+    delete process.env.DEBUG
+  } else {
+    process.env.DEBUG = kept.join(',')
+  }
+}
+
+disablePrismaDebugNamespaces()
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { PrismaClient: PrismaClientConstructor } =
+  require('@prisma/client') as typeof import('@prisma/client')
 
 // Extend the global type so TypeScript knows about our cached client
 const globalForPrisma = globalThis as unknown as {
@@ -17,9 +47,9 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    // ^ In dev, this logs every SQL query to your terminal so you can see what's happening
+  new PrismaClientConstructor({
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    // ^ In dev, keep output quieter (errors/warnings only).
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

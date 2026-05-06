@@ -51,23 +51,25 @@ export function ExercisePicker({ onSelect, onClose }: ExercisePickerProps) {
   return (
     // Backdrop — clicking it closes the modal
     <div
-      className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-4"
+      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       {/* Modal panel — stop click propagation so clicking inside doesn't close it */}
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-xl"
+        className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md h-[min(85vh,720px)] flex flex-col min-h-0 shadow-xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
-        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Choose exercise</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none"
-        >
-          ×
-        </button>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Choose exercise</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none"
+            aria-label="Close"
+            type="button"
+          >
+            ×
+          </button>
         </div>
 
         {/* Search input */}
@@ -78,7 +80,7 @@ export function ExercisePicker({ onSelect, onClose }: ExercisePickerProps) {
             placeholder="Search exercises..."
             value={search}
             onChange={e => { setSearch(e.target.value); setSelectedMuscle(null) }}
-          className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-100"
+            className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-100"
           />
         </div>
 
@@ -112,7 +114,7 @@ export function ExercisePicker({ onSelect, onClose }: ExercisePickerProps) {
         )}
 
         {/* Exercise list */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain">
           {loading ? (
             <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
               Loading exercises...
@@ -163,10 +165,12 @@ function ExerciseRow({ exercise, onSelect }: { exercise: Exercise; onSelect: (e:
     <li>
       <button
         onClick={() => onSelect(exercise)}
-        className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-between group transition-colors"
+        className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-3 group transition-colors"
       >
-        <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{exercise.name}</span>
-        <span className="text-xs text-gray-400 dark:text-gray-400 group-hover:text-blue-500 transition-colors">
+        <span className="min-w-0 flex-1 text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
+          {exercise.name}
+        </span>
+        <span className="shrink-0 text-xs text-gray-400 dark:text-gray-400 group-hover:text-blue-500 transition-colors">
           {exercise.equipment.replace('_', ' ')}
         </span>
       </button>

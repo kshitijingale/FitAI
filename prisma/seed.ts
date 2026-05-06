@@ -2,9 +2,8 @@
 // Run with: npm run db:seed
 // This populates your database with a starter exercise library
 
-import { PrismaClient, MuscleGroup, Equipment } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { MuscleGroup, Equipment } from '@prisma/client'
+import { prisma } from '../src/lib/prisma'
 
 const exercises = [
   // CHEST
