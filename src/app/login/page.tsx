@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [guestLoading, setGuestLoading]= useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -52,6 +53,25 @@ export default function LoginPage() {
     }
   }
 
+  async function handleGuestLogin() {
+    setGuestLoading(true)
+    setError('')
+ 
+    const result = await signIn('credentials', {
+      email:    'demo@fitai.app',
+      password: 'demo1234',
+      redirect: false,
+    })
+ 
+    if (result?.error) {
+      setError('Demo account unavailable. Please try again.')
+      setGuestLoading(false)
+    } else {
+      router.push('/dashboard')
+      router.refresh()
+    }
+  }
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
 
@@ -69,6 +89,33 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold dark:text-gray-400 text-gray-900">FitAI</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your AI-powered fitness coach</p>
+        </div>
+
+        {/* Guest login — same style as the primary submit button */}
+        <button
+          onClick={handleGuestLogin}
+          disabled={guestLoading}
+          className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-2 flex items-center justify-center gap-2"
+        >
+          {guestLoading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            'Try Demo — No Sign up needed'
+          )}
+        </button>
+ 
+        <p className="text-center text-xs text-gray-400 mb-5">
+          Pre-loaded with 8 weeks of workout data
+        </p>
+ 
+        {/* Divider */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs text-gray-400">or continue with email</span>
+          <div className="flex-1 h-px bg-gray-200" />
         </div>
 
         {/* Toggle */}
