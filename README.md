@@ -1,6 +1,6 @@
 # FitAI — AI-Powered Fitness Coach SaaS
 
-> A full-stack fitness tracking app with a personal AI coach, built with Next.js 14, TypeScript, PostgreSQL, and the Anthropic Claude API.
+> A full-stack fitness tracking app with a personal AI coach, built with Next.js 14, TypeScript, PostgreSQL, and the OpenAI API.
 
 ![FitAI Dashboard](docs/dashboard-preview.png)
 
@@ -12,7 +12,7 @@
 | Backend     | Next.js API Routes, Zod validation       |
 | Database    | PostgreSQL via Prisma ORM                |
 | Auth        | NextAuth.js (credentials + Google OAuth) |
-| AI          | Anthropic Claude API (streaming)         |
+| AI          | OpenAI GPT-4o mini (streaming)           |
 | Deployment  | Vercel + Supabase                        |
 | Testing     | Jest + ts-jest                           |
 
@@ -46,10 +46,10 @@ Open `.env.local` and fill in:
 DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-REF].supabase.co:5432/postgres"
 NEXTAUTH_SECRET="run: openssl rand -base64 32"
 NEXTAUTH_URL="http://localhost:3000"
-ANTHROPIC_API_KEY="sk-ant-..."
+OPENAI_API_KEY="sk-..."
 ```
 
-Get your Anthropic API key from [console.anthropic.com](https://console.anthropic.com)
+Get your OpenAI API key from [platform.openai.com](https://platform.openai.com)
 
 ### Step 4 — Set up the database
 
@@ -106,7 +106,7 @@ fitai/
 - **Workout logging** — Log exercises, sets, reps, weight, and RPE
 - **Progress tracking** — Charts for strength progress and weekly volume
 - **Personal records** — Automatically detects when you beat a PR
-- **AI coach** — Chat with Claude, which knows your full training history
+- **AI coach** — Chat with GPT-4o mini, which knows your full training history
 - **AI program generator** — Describe your goal, get a full multi-week program
 - **Nutrition logging** — Describe a meal in plain text, AI estimates macros
 - **Authentication** — Email/password + Google OAuth
@@ -136,7 +136,7 @@ npm i -g vercel
 vercel
 
 # Set environment variables in Vercel dashboard:
-# DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, ANTHROPIC_API_KEY
+# DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, OPENAI_API_KEY
 ```
 
 ---
@@ -145,7 +145,7 @@ vercel
 
 - **TypeScript** — End-to-end type safety from database to UI using Prisma's generated types
 - **PostgreSQL** — Relational database design, complex JOIN queries via Prisma
-- **AI integration** — Streaming API responses with Anthropic's Claude, prompt engineering with user context injection
+- **AI integration** — Streaming API responses with OpenAI, prompt engineering with user context injection
 - **Next.js App Router** — Server components, route handlers, server-side auth
 - **Testing** — Unit testing pure functions and validation schemas with Jest
 

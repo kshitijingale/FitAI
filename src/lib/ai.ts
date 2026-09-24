@@ -4,7 +4,7 @@
 //
 // WHY THIS FILE EXISTS:
 // AI providers all have slightly different SDKs and response shapes.
-// Without this file, swapping from Groq → Gemini → Claude means editing
+// Without this file, swapping from OpenAI → Groq → Gemini → Claude means editing
 // every file that calls the AI. With this file, you change ONE line here
 // and the rest of the app works automatically.
 //
@@ -107,6 +107,45 @@ const groqProvider: AiProvider = {
   streamChat: async (messages, systemPrompt) => groqStream(messages, systemPrompt),
 }
 
+// ─── PROVIDER: OPENAI ─────────────────────────────────────────────────────────
+// Models: gpt-4o-mini (cheap + fast), gpt-4o (higher quality)
+// Docs: platform.openai.com
+
+async function* openaiStream(messages: AiMessage[], systemPrompt: string): StreamResult {
+  const apiKey = requireEnv('OPENAI_API_KEY')
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method:  'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type':  'application/json',
+    },
+    body: JSON.stringify({
+      model:       'gpt-4o-mini',
+      max_tokens:  1024,
+      stream:      true,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({ role: m.role, content: m.content })),
+      ],
+    }),
+  })
+
+  if (!res.ok) {
+    const error = await res.text()
+    throw new Error(`OpenAI API error: ${res.status} ${error}`)
+  }
+
+  for await (const json of streamSseJson(res)) {
+    const chunk = json.choices?.[0]?.delta?.content
+    if (chunk) yield chunk
+  }
+}
+
+const openaiProvider: AiProvider = {
+  name:       'OpenAI GPT-4o mini',
+  streamChat: async (messages, systemPrompt) => openaiStream(messages, systemPrompt),
+}
+
 // ─── PROVIDER: GEMINI ─────────────────────────────────────────────────────────
 // Free tier: 15 requests/min, 1M tokens/day — no credit card needed
 // Models: gemini-1.5-flash (fast + free), gemini-1.5-pro (smarter, limited)
@@ -193,11 +232,12 @@ const anthropicProvider: AiProvider = {
 // ─── ACTIVE PROVIDER ──────────────────────────────────────────────────────────
 //
 // ✅ CHANGE THIS LINE to switch providers. Options:
+//   openaiProvider    — paid, default, needs OPENAI_API_KEY
 //   groqProvider      — free, fast,    needs GROQ_API_KEY
 //   geminiProvider    — free, good,    needs GEMINI_API_KEY
 //   anthropicProvider — paid, best,    needs ANTHROPIC_API_KEY
 //
-const ACTIVE_PROVIDER: AiProvider = groqProvider
+const ACTIVE_PROVIDER: AiProvider = openaiProvider
 
 export const aiProvider = ACTIVE_PROVIDER
 
