@@ -45,7 +45,13 @@ export function useAiChat(conversationId?: string): UseAiChatReturn {
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to get AI response')
+      if (!res.ok) {
+        const body = await res.text()
+        if (res.status === 429) {
+          throw new Error(body || 'Too many AI requests. Please wait and try again.')
+        }
+        throw new Error('Failed to get AI response')
+      }
       if (!res.body) throw new Error('No response body')
 
       // 3. Read the streaming response
@@ -76,7 +82,12 @@ export function useAiChat(conversationId?: string): UseAiChatReturn {
       // Clear any previous failure once we successfully streamed.
       setLastFailedUserMessage(null)
     } catch (err) {
-      setError('Failed to connect to AI coach. Please try again.')
+      const message = err instanceof Error ? err.message : ''
+      setError(
+        message.startsWith('Too many')
+          ? message
+          : 'Failed to connect to AI coach. Please try again.'
+      )
       if (failedUserContent) setLastFailedUserMessage(failedUserContent)
       // Remove the empty assistant message if streaming failed
       setMessages(prev => prev.filter((_, i) => i !== prev.length - 1))

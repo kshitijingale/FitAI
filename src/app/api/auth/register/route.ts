@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { checkRegisterRateLimit, clientIp } from '@/lib/rate-limit'
 import type { ApiResponse, SafeUser } from '@/types'
 
 // ZOD SCHEMA: validates and types the request body in one step
@@ -19,6 +20,14 @@ const registerSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const limited = checkRegisterRateLimit(clientIp(request))
+    if (!limited.ok) {
+      return NextResponse.json<ApiResponse<never>>(
+        { success: false, error: limited.message },
+        { status: 429, headers: { 'Retry-After': String(limited.retryAfterSec) } }
+      )
+    }
+
     const body = await request.json()
 
     // STEP 1: Validate the request body against our schema

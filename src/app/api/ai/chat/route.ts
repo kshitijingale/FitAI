@@ -11,6 +11,11 @@ import { getServerSession } from 'next-auth'
 import { authOptions }      from '@/lib/auth'
 import { prisma }           from '@/lib/prisma'
 import { aiProvider }       from '@/lib/ai'     // ← the only AI import needed
+import {
+  checkAiChatRateLimit,
+  clientIp,
+  rateLimitResponse,
+} from '@/lib/rate-limit'
 import type { ChatMessage, UserFitnessContext } from '@/types'
 import { z } from 'zod'
 
@@ -32,6 +37,9 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 })
   }
+
+  const limited = await checkAiChatRateLimit(session.user.id, clientIp(request))
+  if (!limited.ok) return rateLimitResponse(limited)
 
   let json: unknown
   try {
