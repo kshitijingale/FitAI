@@ -29,8 +29,15 @@ export interface AiProvider {
   streamChat: (messages: AiMessage[], systemPrompt: string) => Promise<StreamResult>
 }
 
+// Next.js inlines env vars only for static access (process.env.FOO).
+// Dynamic process.env[name] is empty on Vercel even when the var is set.
 function requireEnv(name: string): string {
-  const value = process.env[name]
+  const value = {
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    GROQ_API_KEY: process.env.GROQ_API_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  }[name]
   if (!value) throw new Error(`Missing required environment variable: ${name}`)
   return value
 }
